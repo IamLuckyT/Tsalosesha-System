@@ -1,0 +1,84 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    // Collection: users
+    // Fields: uid, fullName, email, role, schoolName, country, nationalId, certificationUrl
+    
+    // Collection: curriculums, levels, subjects, modules, lessons
+    // Fields: Various hierarchical fields
+    
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ADMIN' ||
+         request.auth.token.email == "tlhogi.mothoagae@gmail.com");
+    }
+    
+    function isTeacher() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'TEACHER';
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'fullName', 'email', 'role']) &&
+             data.role in ['ADMIN', 'TEACHER', 'STUDENT'] &&
+             data.fullName is string && data.fullName.size() < 100;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) && isValidUser(request.resource.data) && 
+                    request.resource.data.role == resource.data.role; // Cannot change own role
+      allow delete: if isAdmin();
+    }
+
+    match /curriculums/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /levels/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /subjects/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /modules/{id} {
+      allow read: if true;
+      allow write: if isAdmin() || isTeacher();
+    }
+
+    match /lessons/{id} {
+      allow read: if true;
+      allow write: if isAdmin() || isTeacher();
+    }
+
+    match /enrollments/{id} {
+      allow read: if isAuthenticated() && (isOwner(resource.data.studentId) || isAdmin());
+      allow create: if isAuthenticated() && isOwner(request.resource.data.studentId);
+      allow update: if isAuthenticated() && (isOwner(resource.data.studentId) || isAdmin());
+    }
+  }
+}

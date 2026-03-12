@@ -1,0 +1,9 @@
+{
+  "name": "Tsalosesha System",
+  "description": "A digital platform providing educational resources aligned with the Department of Basic Education Curriculum and Assessment Policy Statement (CAPS), acting as a digital tutor for students and a teaching assistant for educators.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}

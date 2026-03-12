@@ -1,0 +1,96 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "System user (Admin, Teacher, or Student)",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "fullName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["ADMIN", "TEACHER", "STUDENT"] },
+        "schoolName": { "type": "string" },
+        "country": { "type": "string" },
+        "nationalId": { "type": "string" },
+        "certificationUrl": { "type": "string" }
+      },
+      "required": ["uid", "fullName", "email", "role"]
+    },
+    "Curriculum": {
+      "title": "Curriculum",
+      "description": "Educational curriculum (e.g., CAPS, Cambridge)",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "required": ["name"]
+    },
+    "Level": {
+      "title": "Level",
+      "description": "Grade or Level within a curriculum",
+      "type": "object",
+      "properties": {
+        "curriculumId": { "type": "string" },
+        "name": { "type": "string" }
+      },
+      "required": ["curriculumId", "name"]
+    },
+    "Subject": {
+      "title": "Subject",
+      "description": "Subject or Discipline within a level",
+      "type": "object",
+      "properties": {
+        "levelId": { "type": "string" },
+        "name": { "type": "string" }
+      },
+      "required": ["levelId", "name"]
+    },
+    "Module": {
+      "title": "Module",
+      "description": "Learning module within a subject",
+      "type": "object",
+      "properties": {
+        "subjectId": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "required": ["subjectId", "name"]
+    },
+    "Lesson": {
+      "title": "Lesson",
+      "description": "Individual lesson within a module",
+      "type": "object",
+      "properties": {
+        "moduleId": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "videoUrl": { "type": "string" },
+        "pdfUrl": { "type": "string" },
+        "order": { "type": "integer" }
+      },
+      "required": ["moduleId", "title", "content", "order"]
+    },
+    "Enrollment": {
+      "title": "Enrollment",
+      "description": "Student enrollment in a subject",
+      "type": "object",
+      "properties": {
+        "studentId": { "type": "string" },
+        "subjectId": { "type": "string" },
+        "progress": { "type": "number" },
+        "completed": { "type": "boolean" }
+      },
+      "required": ["studentId", "subjectId"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": { "schema": "User", "description": "User profiles" },
+    "/curriculums/{curriculumId}": { "schema": "Curriculum", "description": "Curriculum types" },
+    "/levels/{levelId}": { "schema": "Level", "description": "Grades/Levels" },
+    "/subjects/{subjectId}": { "schema": "Subject", "description": "Subjects" },
+    "/modules/{moduleId}": { "schema": "Module", "description": "Modules" },
+    "/lessons/{lessonId}": { "schema": "Lesson", "description": "Lessons" },
+    "/enrollments/{enrollmentId}": { "schema": "Enrollment", "description": "Student enrollments" }
+  }
+}
